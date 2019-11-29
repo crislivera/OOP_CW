@@ -1,43 +1,28 @@
-import com.mongodb.MongoClientSettings;
-import com.mongodb.ServerAddress;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-
-import java.util.Arrays;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Console {
 
     public static void main(String[] args) {
 
-        Logger mongoLogger = Logger.getLogger( "org.mongodb.driver" );
-        mongoLogger.setLevel(Level.SEVERE);
-        MongoClient mongoClient = MongoClients.create(
-                MongoClientSettings.builder()
-                        .applyToClusterSettings(builder ->
-                                builder.hosts(Arrays.asList(new ServerAddress("localhost", 27017))))
-                        .build()
-        );
 
-        MongoDatabase database = mongoClient.getDatabase("WesminterRentalVehicleManager");
-        MongoCollection collection = database.getCollection("Vehicle");
 
-       System.out.println("Welcome to Wesminster Rental Vehicle Manager Console!");
+
+
+       System.out.println("Welcome to Westminster Rental Vehicle Manager Console!");
 
        boolean exit = false;
        while (!exit){
-           exit = menu(mongoClient);
+           exit = menu();
+
        }
 
+       WestminsterRentalVehicleManager wrm = new WestminsterRentalVehicleManager();
+        wrm.sendVehiclesMongo(Mongos.mongoConnection());
 
 
 
-      // RentalVehicleManager sys = new WesminterRentalVehicleManager();
-       //sys.viewListOfVehicles(mongoClient);
+
+
 
 
 
@@ -46,7 +31,7 @@ public class Console {
 
     }
 
-    public static boolean menu(MongoClient mongoClient){
+    public static boolean menu(){
         System.out.println("To add a car press 1");
         System.out.println("To add a motorbike press 2");
         System.out.println("To delete a vehicle press 3");
@@ -62,20 +47,23 @@ public class Console {
         switch (choice){
 
             case 1:
-                addingACar(mongoClient);
+                RentalVehicleManager addCar = new WestminsterRentalVehicleManager();
+                addCar.addVehicle(addingACar());
                 break;
 
             case 2:
-                addingAMotorbike(mongoClient);
+                RentalVehicleManager addBike = new WestminsterRentalVehicleManager();
+                addBike.addVehicle(addingAMotorbike());
                 break;
 
             case 3:
-               deleteVehicle(mongoClient);
+                //deleting vehicle here
+               deleteVehicle();
                 break;
 
             case 4:
-                RentalVehicleManager sys = new WesminterRentalVehicleManager();
-                sys.viewListOfVehicles(mongoClient);
+                RentalVehicleManager sys = new WestminsterRentalVehicleManager();
+                sys.viewListOfVehicles();
                 break;
 
             case 5:
@@ -94,7 +82,7 @@ public class Console {
     }
 
 
-    public static   void addingACar(MongoClient mongoClient){
+    public static   Car addingACar(){
         Scanner add = new Scanner(System.in);
         System.out.println("Adding a Car..................");
         System.out.print("Insert the plate number of the vehicle: ");
@@ -127,12 +115,12 @@ public class Console {
         if (ab.equals("YES") || ab.equals("yes")) hasAB = true;
 
         Vehicle car = new Car(plateNo,make,model,seatCap,fuelCap,fuelEf,rental,transmission,numDoors,boot,isAC,hasAB);
-        RentalVehicleManager sys = new WesminterRentalVehicleManager();
-        sys.addVehicle(car, mongoClient);
+        return (Car) car;
+
 
     }
 
-    public static void addingAMotorbike(MongoClient mongoClient){
+    public static Motorbike addingAMotorbike(){
         Scanner add = new Scanner(System.in);
         System.out.println("Adding a Motorbike..................");
         System.out.print("Insert the plate number of the vehicle: ");
@@ -162,17 +150,18 @@ public class Console {
 
 
         Vehicle motorbike = new Motorbike(plateNo,make,model,seatCap,fuelCap,fuelEf,rental,transmission,isScoot,numOfHelmets);
-        RentalVehicleManager sys = new WesminterRentalVehicleManager();
-        sys.addVehicle(motorbike, mongoClient);
+        return (Motorbike) motorbike;
 
     }
-    public static void deleteVehicle(MongoClient mongoClient){
+    public static void deleteVehicle(){
         System.out.print("Please enter the vehicle plate number that you want to delete: ");
         Scanner scanner = new Scanner(System.in);
         String plateDel = scanner.next();
         System.out.println("Warning!!! Are you sure to delete "+plateDel+" vehicle? (Y/N):");
         String decision = scanner.next();
-        WesminterRentalVehicleManager man = new WesminterRentalVehicleManager();
-        man.deleteVehicle(plateDel,decision,mongoClient);
+        if (decision.equals("y")|| decision.equals("Y")) {
+            WestminsterRentalVehicleManager delwrm = new WestminsterRentalVehicleManager();
+            delwrm.deleteVehicle(plateDel);
+        }
     }
 }
